@@ -23,10 +23,11 @@ from datetime import date
 #s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.bind(('',9999))# lien du socket
-while True:
+i = 0
+while i:
     message=s.recvfrom(1024)
     message_text = message[0].decode()
     client = socket.getnameinfo(message[1], 10)
     print(client[0], message_text)
     if message == 'quit':
-        break
+        i = 1
