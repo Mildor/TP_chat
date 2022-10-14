@@ -2,10 +2,18 @@
 
 import multiprocessing
 from os import kill
-import socket
+import socket as socke
 from socket import *
 import threading
 import sys
+
+def broadcast(message):
+    sock = socket(AF_INET, SOCK_STREAM)
+    sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+    sock.bind(("",9999))
+    (clientsocket, (ip, port)) = sock.accept()
+    clientsocket.send(bytes(message, 'UTF-8'))
+
 
 class ClientThread(threading.Thread):
 
@@ -17,25 +25,27 @@ class ClientThread(threading.Thread):
         print("[+] Nouveau thread pour %s %s" % (self.ip, self.port, ))
 
     def run(self): 
-        i = 0
-        while i == 0:
-            print("Connexion de %s %s" % (self.ip, self.port, ))
+        print("Connexion de %s %s" % (self.ip, self.port, ))
+        while True:
             data = self.clientsocket.recv(2048)
             data = data.decode()
-            print(data)
-            if data == 'quit':
-                self.clientsocket.send(bytes(data, 'UTF-8'))
-                print("Connexion fermée de %s %s" % (self.ip, self.port, ))
-
-sock = socket(AF_INET, SOCK_STREAM)
-sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-sock.bind(("",1111))
-
+            client = socke.gethostbyaddr(self.ip)
+            print(">> "+client[0][:9]+" : "+data)
+            broadcast(data)
+            if data is None or data == "" or data=="quit":
+                print("Connexion de %s %s coupé" % (self.ip, self.port, ))
+                break
+            return self.clientsocket
+            
 
 
 while True:
+    sock = socket(AF_INET, SOCK_STREAM)
+    sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+    sock.bind(("",1111))
     sock.listen(10)
     print( "En écoute...")
     (clientsocket, (ip, port)) = sock.accept()
     newthread = ClientThread(ip, port, clientsocket)
     newthread.start()
+    
