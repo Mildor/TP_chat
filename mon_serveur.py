@@ -5,13 +5,9 @@ from os import kill
 import socket as socke
 from socket import *
 import threading
-import sys
 
-def broadcast(message):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    s.sendto(bytes(message),'UTF-8'),('255.255.255.255',1111))
 
+users = []
 
 class ClientThread(threading.Thread):
 
@@ -28,13 +24,16 @@ class ClientThread(threading.Thread):
             data = self.clientsocket.recv(2048)
             data = data.decode()
             client = socke.gethostbyaddr(self.ip)
-            print(">> "+client[0][:9]+" : "+data)
-            broadcast(data)
+            print(data)
+            self.multicast(data)
             if data is None or data == "" or data=="quit":
                 print("Connexion de %s %s coupé" % (self.ip, self.port, ))
                 break
-            return self.clientsocket
-            
+
+    def multicast(self, message):
+        for user in users:
+            if user != self.clientsocket:
+                user.send(message.encode())
 
 
 while True:
@@ -44,6 +43,6 @@ while True:
     sock.listen(10)
     print( "En écoute...")
     (clientsocket, (ip, port)) = sock.accept()
+    users.append(clientsocket)
     newthread = ClientThread(ip, port, clientsocket)
     newthread.start()
-    

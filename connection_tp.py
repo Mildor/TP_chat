@@ -8,5 +8,3 @@ s.sendto(bytes(str(input('entrez votre phrase : ')),'UTF-8'),('info24-13',9999))
 while True:
     data, addr = s.recvfrom(1024)
     print ("Message: ", data)
-
-

@@ -1,20 +1,20 @@
-# coding: utf-8
-
-import socket
 from socket import *
+from threading import *
 
-sock = socket(AF_INET, SOCK_STREAM)
-sock.connect(('', 1111))
+connexion = socket(AF_INET, SOCK_STREAM)
+connexion.connect(("info24-15", 9999))
 
-print("Entrez le nom du fichier que vous voulez récupérer:") # le fichier ne doit pas être vide
-file_name = input(">> ") 
-sock.send(file_name.encode())
-file_name = './%s' % (file_name,)
-data = sock.recv(1024)
-with open(file_name,'wb') as _file:
-    _file.write(data)
-print("Le fichier a été récupéré : %s." % file_name)
+def thread_en_envoie():
+    while True:
+        message = input()
+        if message:
+            message = gethostname()+" : "+message
+            connexion.send(message.encode())
 
-sock=socket(AF_INET, SOCK_DGRAM)
-sock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-sock.sendto(bytes('Ceci est mon message broadcast','UTF-8'),('255.255.255.255',9999))
+def thread_en_reception():
+    while True:
+        message = connexion.recv(1024).decode()
+        print(message)
+
+Thread(target=thread_en_envoie).start()
+Thread(target=thread_en_reception).start()
