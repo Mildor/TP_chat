@@ -8,11 +8,9 @@ import threading
 import sys
 
 def broadcast(message):
-    sock = socket(AF_INET, SOCK_STREAM)
-    sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-    sock.bind(("",9999))
-    (clientsocket, (ip, port)) = sock.accept()
-    clientsocket.send(bytes(message, 'UTF-8'))
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    s.sendto(bytes(message),'UTF-8'),('255.255.255.255',1111))
 
 
 class ClientThread(threading.Thread):
